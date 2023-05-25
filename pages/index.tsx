@@ -107,7 +107,15 @@ export default function Main() {
   }
 
   if (!userData.initialWeight) {
-    return <RequestInitialWeight error={error} setError={setError} setUserData={setUserData} userData={userData} />;
+    return (
+      <RequestInitialWeight
+        error={error}
+        setError={setError}
+        setUserData={setUserData}
+        userData={userData}
+        setWeightData={setWeightData}
+      />
+    );
   } else {
     return (
       <div className="flex flex-col  h-screen">

@@ -2,12 +2,13 @@ import { useState } from "react";
 
 export interface IAppProps {
   setUserData: (e: any) => void;
+  setWeightData: (e: any) => void;
   setError: (e: string | null) => void;
   userData: any;
   error: string | null;
 }
 
-export default function RequestInitialWeight({ setUserData, userData, error, setError }: IAppProps) {
+export default function RequestInitialWeight({ setUserData, userData, error, setError, setWeightData }: IAppProps) {
   const [userInput, setUserInput] = useState<any>(null);
 
   const submitWeight = (e: any) => {
@@ -15,7 +16,11 @@ export default function RequestInitialWeight({ setUserData, userData, error, set
       setError("Please enter your current weight to continue.");
       return;
     }
+    const today = new Date().toLocaleDateString();
     const userEnteredData = { ...userData, initialWeight: userInput.initialWeight };
+    const newWeightData: any = [{ date: today, weight: userInput.initialWeight }];
+    setWeightData(newWeightData);
+    localStorage.setItem("weightData", JSON.stringify(newWeightData));
 
     setUserData(userEnteredData);
     localStorage.setItem("userData", JSON.stringify(userEnteredData));

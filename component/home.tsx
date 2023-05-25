@@ -77,8 +77,6 @@ export default function Home({ weightData, userData }: IAppProps) {
     return +(goalWeightToNumber - currentWeightToNumber).toFixed(1);
   };
 
-
-
   // Calculate the average weight for the last week
   const currentDate = new Date();
   const lastWeekStartDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - 7);
@@ -108,7 +106,14 @@ export default function Home({ weightData, userData }: IAppProps) {
   console.log("userData:", weightData);
   return (
     <div className="bg-white h-[91%] overflow-y-auto flex flex-col items-center py-4 px-8">
-      <button onClick={() => localStorage.removeItem("weightData")}>delete</button>
+      <button
+        onClick={() => {
+          localStorage.removeItem("weightData");
+          localStorage.removeItem("weightData");
+        }}
+      >
+        delete
+      </button>
       <Link href={"/settings"} className="self-end">
         <svg
           xmlns="http://www.w3.org/2000/svg"
