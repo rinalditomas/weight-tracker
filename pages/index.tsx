@@ -1,61 +1,132 @@
-import styles from '../styles/Home.module.css'
+import { useEffect, useState } from "react";
+import Navbar from "../component/navbar";
+import styles from "../styles/Home.module.css";
+import Home from "../component/home";
+import Graph from "../component/graph";
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { classNames } from "../utils";
+import NewRecord from "../component/newRecord";
+import RequestName from "../component/requestName";
+import RequestInitialWeight from "../component/requestInitialWeight";
+import RequestGoalWeight from "../component/requestGoalWeight";
 
-export default function Home() {
-  return (
-    <div className={styles.container}>
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
+const data = [
+  { name: "Page A", uv: 81, pv: 2400, amt: 2400 },
+  { name: "Page B", uv: 81.5, pv: 1200, amt: 1200 },
+  { name: "Page C", uv: 82, pv: 2000, amt: 2000 },
+  { name: "Page D", uv: 83, pv: 1000, amt: 1000 },
+  { name: "Page D", uv: 85, pv: 1000, amt: 1000 },
+];
+export interface WeightData {
+  date: string;
+  weight: string;
+}
+export default function Main() {
+  const [selectedTab, setSelectedTab] = useState("home");
+  const [weightInput, setWeightInput] = useState<number | null>(null);
+  const [dateInput, setDateInput] = useState<string | null>(null);
+  const [weightData, setWeightData] = useState<WeightData[]>([]);
+  const [userData, setUserData] = useState<any>({});
+  const [error, setError] = useState<string | null>(null);
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
+  useEffect(() => {
+    let localData = localStorage.getItem("weightData");
+    let userLocalData = localStorage.getItem("userData");
+    if (localData !== null) {
+      let parsedWeightData = JSON.parse(localData);
+      let sortedWeightData = parsedWeightData.sort((a: any, b: any) => {
+        const dateA: any = new Date(a.date.split("/").reverse().join("/"));
+        const dateB: any = new Date(b.date.split("/").reverse().join("/"));
+        return dateB - dateA;
+      });
+      setWeightData(sortedWeightData);
+    }
+    if (userLocalData !== null) {
+      let parsedUserData = JSON.parse(userLocalData);
+      setUserData(parsedUserData);
+    }
+  }, []);
 
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
+  const handleSubmit = (event: any) => {
+    if (!weightInput) {
+      setError("Please enter your weight.");
+      return;
+    }
 
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
+    event.preventDefault();
+    const setDate = dateInput ? new Date(dateInput) : new Date();
+    const dateString = setDate.toLocaleDateString();
 
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
+    const existingWeightData = weightData.find((data: any) => data.date === dateString);
 
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
+    if (existingWeightData) {
+      const confirmed = window.confirm(`You already have a weight record for ${dateString}. Do you want to update it?`);
 
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
-  )
+      if (confirmed) {
+        const updatedWeightData = weightData.map((data: any) => {
+          if (data.date === dateString) {
+            return { ...data, weight: weightInput };
+          }
+          return data;
+        });
+
+        setWeightData(updatedWeightData);
+        localStorage.setItem("weightData", JSON.stringify(updatedWeightData));
+        setSelectedTab("graph");
+        setWeightInput(null);
+        setDateInput(null);
+        setError(null);
+      }
+    } else {
+      const newWeightData: any = [...weightData, { date: dateString, weight: weightInput }];
+      setWeightData(newWeightData);
+      localStorage.setItem("weightData", JSON.stringify(newWeightData));
+      setSelectedTab("graph");
+      setWeightInput(null);
+      setDateInput(null);
+      setError(null);
+    }
+  };
+
+  const changeTab = (tab: string) => {
+    setSelectedTab(tab);
+    setError(null);
+  };
+
+  function deleteWeightRecord(records: any, selectedRecord: any) {
+    let newArrayOfWeights = records.filter((record: any) => record !== selectedRecord);
+    setWeightData(newArrayOfWeights);
+    localStorage.setItem("weightData", JSON.stringify(newArrayOfWeights));
+  }
+
+  if (!userData.name) {
+    return <RequestName error={error} setError={setError} setUserData={setUserData} userData={userData} />;
+  }
+  if (!userData.goalWeight) {
+    return <RequestGoalWeight error={error} setError={setError} setUserData={setUserData} userData={userData} />;
+  }
+
+  if (!userData.initialWeight) {
+    return <RequestInitialWeight error={error} setError={setError} setUserData={setUserData} userData={userData} />;
+  } else {
+    return (
+      <div className="flex flex-col  h-screen">
+        {selectedTab === "home" ? (
+          <Home weightData={weightData} userData={userData} />
+        ) : selectedTab === "new" ? (
+          <NewRecord
+            changeTab={changeTab}
+            error={error}
+            handleSubmit={handleSubmit}
+            setWeightInput={setWeightInput}
+            setDateInput={setDateInput}
+            setError={setError}
+          />
+        ) : (
+          <Graph weightData={weightData} deleteWeightRecord={deleteWeightRecord} />
+        )}
+        <Navbar changeTab={changeTab} selectedTab={selectedTab} />
+      </div>
+    );
+  }
 }
