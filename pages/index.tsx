@@ -78,7 +78,7 @@ export default function Main() {
         setError(null);
       }
     } else {
-      const newWeightData: any = [...weightData, { date: dateString, weight: weightInput }];
+      const newWeightData: any = [{ date: dateString, weight: weightInput }, ...weightData];
       setWeightData(newWeightData);
       localStorage.setItem("weightData", JSON.stringify(newWeightData));
       setSelectedTab("graph");
