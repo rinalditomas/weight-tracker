@@ -23,7 +23,7 @@ export interface WeightData {
 }
 export default function Main() {
   const [selectedTab, setSelectedTab] = useState("home");
-  const [weightInput, setWeightInput] = useState<number | null>(null);
+  const [weightInput, setWeightInput] = useState<string | null>(null);
   const [dateInput, setDateInput] = useState<string | null>(null);
   const [weightData, setWeightData] = useState<WeightData[]>([]);
   const [userData, setUserData] = useState<any>({});
@@ -48,16 +48,19 @@ export default function Main() {
   }, []);
 
   const handleSubmit = (event: any) => {
+    event.preventDefault();
+
     if (!weightInput) {
       setError("Please enter your weight.");
       return;
     }
 
-    event.preventDefault();
     const setDate = dateInput ? new Date(dateInput) : new Date();
     const dateString = setDate.toLocaleDateString();
 
     const existingWeightData = weightData.find((data: any) => data.date === dateString);
+
+    const transformedWeightInput = weightInput && weightInput.replace(",", ".");
 
     if (existingWeightData) {
       const confirmed = window.confirm(`You already have a weight record for ${dateString}. Do you want to update it?`);
@@ -65,7 +68,7 @@ export default function Main() {
       if (confirmed) {
         const updatedWeightData = weightData.map((data: any) => {
           if (data.date === dateString) {
-            return { ...data, weight: weightInput };
+            return { ...data, weight: transformedWeightInput };
           }
           return data;
         });
@@ -78,7 +81,7 @@ export default function Main() {
         setError(null);
       }
     } else {
-      const newWeightData: any = [{ date: dateString, weight: weightInput }, ...weightData];
+      const newWeightData: any = [{ date: dateString, weight: transformedWeightInput }, ...weightData];
       setWeightData(newWeightData);
       localStorage.setItem("weightData", JSON.stringify(newWeightData));
       setSelectedTab("graph");
