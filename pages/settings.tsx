@@ -8,7 +8,7 @@ const ModalContent = ({ type, userData, submitEditedData, setInputData }: any) =
   switch (type) {
     case "name": {
       return (
-        <div className="bg-white rounded-lg w-11/12 p-6 shadow  space-y-6 drop-shadow">
+        <div className="bg-gray-50 rounded-lg w-11/12 p-6 shadow  space-y-6 drop-shadow">
           <h2 className="text-gray-600 font-semibold">Change Name</h2>
           <div className="flex w-full justify-between items-center">
             <input

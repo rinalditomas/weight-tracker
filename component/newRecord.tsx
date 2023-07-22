@@ -42,7 +42,7 @@ export default function NewRecord({
   }
 
   return (
-    <div className="bg-white flex items-center justify-between py-12 px-6   flex-col h-[91%] overflow-y-auto">
+    <div className="bg-gray-50 flex items-center justify-between py-12 px-6   flex-col h-[91%] overflow-y-auto">
       <div className="flex items-center justify-between w-full">
         <h1 className=" text-4xl text-gray-700   ">Add weight</h1>
         <button

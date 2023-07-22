@@ -105,7 +105,7 @@ export default function Home({ weightData, userData }: IAppProps) {
   }
   console.log("userData:", weightData);
   return (
-    <div className="bg-white h-[91%] overflow-y-auto flex flex-col items-center py-4 px-8">
+    <div className="bg-gray-50 h-[91%] overflow-y-auto flex flex-col items-center py-4 px-8">
       
       <Link href={"/settings"} className="self-end">
         <svg
