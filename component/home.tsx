@@ -109,7 +109,7 @@ export default function Home({ weightData, userData }: IAppProps) {
       <button
         onClick={() => {
           localStorage.removeItem("weightData");
-          localStorage.removeItem("weightData");
+          localStorage.removeItem("userData");
         }}
       >
         delete
