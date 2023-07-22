@@ -10,13 +10,6 @@ import RequestName from "../component/requestName";
 import RequestInitialWeight from "../component/requestInitialWeight";
 import RequestGoalWeight from "../component/requestGoalWeight";
 
-const data = [
-  { name: "Page A", uv: 81, pv: 2400, amt: 2400 },
-  { name: "Page B", uv: 81.5, pv: 1200, amt: 1200 },
-  { name: "Page C", uv: 82, pv: 2000, amt: 2000 },
-  { name: "Page D", uv: 83, pv: 1000, amt: 1000 },
-  { name: "Page D", uv: 85, pv: 1000, amt: 1000 },
-];
 export interface WeightData {
   date: string;
   weight: string;
@@ -32,6 +25,7 @@ export default function Main() {
   useEffect(() => {
     let localData = localStorage.getItem("weightData");
     let userLocalData = localStorage.getItem("userData");
+    console.log("USER LOCAL DATA:", userLocalData);
     if (localData !== null) {
       let parsedWeightData = JSON.parse(localData);
       let sortedWeightData = parsedWeightData.sort((a: any, b: any) => {
@@ -101,6 +95,59 @@ export default function Main() {
     setWeightData(newArrayOfWeights);
     localStorage.setItem("weightData", JSON.stringify(newArrayOfWeights));
   }
+  function calculateWeeklyAverages(data: any) {
+    // Convert date strings to Date objects
+    const formattedData = data.map((entry: any) => ({
+      ...entry,
+      date: new Date(entry.date.split("/").reverse().join("-")),
+    }));
+
+    // Sort the data array by dates in ascending order
+    formattedData.sort((a: any, b: any) => a.date - b.date);
+
+    let weeklyAverages = [];
+
+    // Group weight entries by week
+    let currentWeek = [];
+    for (let i = 0; i < formattedData.length; i++) {
+      const entry = formattedData[i];
+      currentWeek.push(entry);
+
+      // Check if the next entry is in a different week or if it's the last entry
+      if (i === formattedData.length - 1 || getWeekNumber(entry.date) !== getWeekNumber(formattedData[i + 1].date)) {
+        // Calculate the average weight for the current week
+        const average = calculateAverageWeight(currentWeek);
+
+        weeklyAverages.push(average);
+
+        // Reset the current week array
+        currentWeek = [];
+      }
+    }
+
+    return weeklyAverages;
+  }
+
+  function getWeekNumber(date: any) {
+    const oneJan: any = new Date(date.getFullYear(), 0, 1);
+    return Math.ceil(((date - oneJan) / 86400000 + oneJan.getDay() + 1) / 7);
+  }
+
+  function calculateAverageWeight(weekData: any) {
+    const weights = weekData.map((entry: any) => parseFloat(entry.weight));
+    const existingWeights = weights.filter((weight: any) => !isNaN(weight));
+
+    if (existingWeights.length === 0) {
+      return null;
+    }
+
+    const sum = existingWeights.reduce((acc: any, weight: any) => acc + weight, 0);
+    const average = sum / existingWeights.length;
+
+    return average.toFixed(2); // Adjust the decimal places as desired
+  }
+
+  const weeklyAverages = calculateWeeklyAverages(weightData);
 
   if (!userData.name) {
     return <RequestName error={error} setError={setError} setUserData={setUserData} userData={userData} />;
