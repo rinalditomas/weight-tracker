@@ -3,7 +3,7 @@ import { useState } from "react";
 export interface IAppProps {
   handleSubmit: (e: any) => void;
   setDateInput: (e: any) => void;
-  setWeightInput: (e: number) => void;
+  setWeightInput: (e: string) => void;
   error: string | null;
   changeTab: (e: string) => void;
   setError: (e: string | null) => void;
