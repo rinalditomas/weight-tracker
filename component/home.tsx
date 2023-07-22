@@ -72,7 +72,7 @@ export default function Home({ weightData, userData }: IAppProps) {
 
   let getWhatLeftToGoal = (): number => {
     let goalWeightToNumber = Number(userData.goalWeight);
-    let currentWeightToNumber = Number(weightData[0].weight);
+    let currentWeightToNumber = weightData[0] ? Number(weightData[0].weight) : Number(userData.initialWeight);
 
     return +(goalWeightToNumber - currentWeightToNumber).toFixed(1);
   };
@@ -130,7 +130,9 @@ export default function Home({ weightData, userData }: IAppProps) {
       <h1 className=" text-3xl text-gray-500 ">My weight progress</h1>
       <div className="w-full flex flex-col items-center py-8 space-y-4">
         <div className="flex flex-col space-y-2 items-center">
-          <h1 className="text-6xl font-bold text-gray-600">{weightData[0] && weightData[0].weight}</h1>
+          <h1 className="text-6xl font-bold text-gray-600">
+            {weightData[0] ? weightData[0].weight : userData.initialWeight}
+          </h1>
           <p>{weightData[0] && weightData[0].date}</p>
           <h1 className="text-lg text-gray-500">{`${Math.abs(getWhatLeftToGoal())}kg left to my goal`}</h1>
         </div>
@@ -140,11 +142,19 @@ export default function Home({ weightData, userData }: IAppProps) {
             <div
               className="absolute top-0 left-0 h-full bg-opacity-70  bg-orange-500  rounded-full"
               style={{
-                width: `${calculateProgress(
-                  Number(userData.initialWeight),
-                  Number(userData.goalWeight),
-                  Number(weightData[0].weight)
-                )}%`,
+                width: `${
+                  weightData[0]
+                    ? calculateProgress(
+                        Number(userData.initialWeight),
+                        Number(userData.goalWeight),
+                        Number(weightData[0].weight)
+                      )
+                    : calculateProgress(
+                        Number(userData.initialWeight),
+                        Number(userData.goalWeight),
+                        Number(userData.initialWeight)
+                      )
+                }%`,
               }}
             ></div>
           </div>
