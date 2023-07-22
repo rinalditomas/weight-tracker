@@ -135,10 +135,11 @@ export default function Settings(props: IAppProps) {
         setInputData({});
         setIsModalOpen(false);
         break;
-
       }
       case "initialWeight": {
-        const newUserData: any = { ...userData, initialWeight: inputData.initialWeight };
+        const transformedWeightInput = inputData.initialWeight.replace(",", ".");
+
+        const newUserData: any = { ...userData, initialWeight: transformedWeightInput };
         setUserData(newUserData);
         localStorage.setItem("userData", JSON.stringify(newUserData));
         setInputData({});
@@ -146,7 +147,9 @@ export default function Settings(props: IAppProps) {
         break;
       }
       case "goalWeight": {
-        const newUserData: any = { ...userData, goalWeight: inputData.goalWeight };
+        const transformedWeightInput = inputData.goalWeight.replace(",", ".");
+
+        const newUserData: any = { ...userData, goalWeight: transformedWeightInput };
         setUserData(newUserData);
         localStorage.setItem("userData", JSON.stringify(newUserData));
         setInputData({});
@@ -173,78 +176,91 @@ export default function Settings(props: IAppProps) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12h-15m0 0l6.75 6.75M4.5 12l6.75-6.75" />
         </svg>
       </Link>
+      <div className=" h-[70%] flex flex-col justify-between">
+        <div className="w-full ">
+          <h1 className="pb-12 text-3xl text-gray-500">Settings</h1>
 
-      <h1 className="pb-12 text-3xl text-gray-500">Settings</h1>
+          <div className="w-full space-y-4 divide-y divide-gray-200">
+            <button
+              onClick={() => {
+                setModalType("name");
+                setIsModalOpen(true);
+              }}
+              className="w-full flex justify-between items-center"
+            >
+              <span className="text-gray-600">Name</span>
+              <div className="flex items-center space-x-4">
+                <span className="text-gray-400">{userData.name}</span>
 
-      <div className="w-full space-y-4 divide-y divide-gray-200">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-4 h-4 text-gray-400"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+              </div>
+            </button>
+            <button
+              onClick={() => {
+                setModalType("initialWeight");
+                setIsModalOpen(true);
+              }}
+              className="w-full flex justify-between items-center"
+            >
+              <span className="text-gray-600">Initial Weight</span>
+              <div className="flex items-center space-x-4 pt-4">
+                <span className="text-gray-400">{userData.initialWeight}kg</span>
+
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-4 h-4 text-gray-400"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+              </div>
+            </button>
+            <button
+              onClick={() => {
+                setModalType("goalWeight");
+                setIsModalOpen(true);
+              }}
+              className="w-full flex justify-between items-center"
+            >
+              <span className="text-gray-600">Goal Weight</span>
+              <div className="flex items-center space-x-4 pt-4 ">
+                <span className="text-gray-400">{userData.goalWeight}kg</span>
+
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-4 h-4 text-gray-400"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+              </div>
+            </button>
+          </div>
+        </div>
+
         <button
           onClick={() => {
-            setModalType("name");
-            setIsModalOpen(true);
+            localStorage.removeItem("weightData");
+            localStorage.removeItem("userData");
           }}
-          className="w-full flex justify-between items-center"
+          className="rounded-xl bg-red-400 opacity-90   py-6 w-full text-sm font-semibold text-white shadow-sm"
         >
-          <span className="text-gray-600">Name</span>
-          <div className="flex items-center space-x-4">
-            <span className="text-gray-400">{userData.name}</span>
-
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-4 h-4 text-gray-400"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-            </svg>
-          </div>
-        </button>
-        <button
-          onClick={() => {
-            setModalType("initialWeight");
-            setIsModalOpen(true);
-          }}
-          className="w-full flex justify-between items-center"
-        >
-          <span className="text-gray-600">Initial Weight</span>
-          <div className="flex items-center space-x-4 pt-4">
-            <span className="text-gray-400">{userData.initialWeight}kg</span>
-
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-4 h-4 text-gray-400"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-            </svg>
-          </div>
-        </button>
-        <button
-          onClick={() => {
-            setModalType("goalWeight");
-            setIsModalOpen(true);
-          }}
-          className="w-full flex justify-between items-center"
-        >
-          <span className="text-gray-600">Goal Weight</span>
-          <div className="flex items-center space-x-4 pt-4 ">
-            <span className="text-gray-400">{userData.goalWeight}kg</span>
-
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-4 h-4 text-gray-400"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-            </svg>
-          </div>
+          Delete local data
         </button>
       </div>
       {isModalOpen && (

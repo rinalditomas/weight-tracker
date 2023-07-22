@@ -106,14 +106,7 @@ export default function Home({ weightData, userData }: IAppProps) {
   console.log("userData:", weightData);
   return (
     <div className="bg-white h-[91%] overflow-y-auto flex flex-col items-center py-4 px-8">
-      <button
-        onClick={() => {
-          localStorage.removeItem("weightData");
-          localStorage.removeItem("userData");
-        }}
-      >
-        delete
-      </button>
+      
       <Link href={"/settings"} className="self-end">
         <svg
           xmlns="http://www.w3.org/2000/svg"
