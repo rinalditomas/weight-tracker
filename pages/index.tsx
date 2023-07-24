@@ -25,7 +25,8 @@ export default function Main() {
   useEffect(() => {
     let localData = localStorage.getItem("weightData");
     let userLocalData = localStorage.getItem("userData");
-    console.log("USER LOCAL DATA:", userLocalData);
+
+    
     if (localData !== null) {
       let parsedWeightData = JSON.parse(localData);
       let sortedWeightData = parsedWeightData.sort((a: any, b: any) => {

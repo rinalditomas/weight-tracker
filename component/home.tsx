@@ -103,7 +103,6 @@ export default function Home({ weightData, userData }: IAppProps) {
     const progress = ((weightDifference - Math.abs(currentWeight - goalWeight)) / weightDifference) * 100;
     return Math.max(0, Math.min(100, progress)); // Ensure the progress is between 0 and 100
   }
-  console.log("userData:", weightData);
   return (
     <div className="bg-gray-50 h-[91%] overflow-y-auto flex flex-col items-center py-4 px-8">
       
