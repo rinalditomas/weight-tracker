@@ -17,8 +17,12 @@ export default function RequestInitialWeight({ setUserData, userData, error, set
       return;
     }
     const today = new Date().toLocaleDateString();
-    const userEnteredData = { ...userData, initialWeight: userInput.initialWeight };
-    const newWeightData: any = [{ date: today, weight: userInput.initialWeight }];
+
+    const transformedWeightInput = userInput.initialWeight && userInput.initialWeight.replace(",", ".");
+
+
+    const userEnteredData = { ...userData, initialWeight: transformedWeightInput };
+    const newWeightData: any = [{ date: today, weight: transformedWeightInput }];
     setWeightData(newWeightData);
     localStorage.setItem("weightData", JSON.stringify(newWeightData));
 

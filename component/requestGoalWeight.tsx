@@ -15,7 +15,10 @@ export default function RequestGoalWeight({ setUserData, userData, error, setErr
       setError("Please enter your goal weight to continue.");
       return;
     }
-    const userEnteredData = { ...userData, goalWeight: userInput.goalWeight };
+
+    const transformedWeightInput = userInput.goalWeight && userInput.goalWeight.replace(",", ".");
+
+    const userEnteredData = { ...userData, goalWeight: transformedWeightInput };
 
     setUserData(userEnteredData);
     localStorage.setItem("userData", JSON.stringify(userEnteredData));
