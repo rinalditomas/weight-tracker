@@ -100,67 +100,76 @@ const ModalContent = ({ type, userData, submitEditedData, setInputData }: any) =
     }
 
     default:
-      return <div>errro</div>;
+      return <div>error</div>;
   }
 };
 
+interface UserData {
+  name: string;
+  initialWeight: string;
+  goalWeight: string;
+}
+
 export default function Settings(props: IAppProps) {
-  const [userData, setUserData] = useState<any>({});
-  const [inputData, setInputData] = useState<any>({});
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [userData, setUserData] = useState<UserData>({ name: "", initialWeight: "", goalWeight: "" });
+  const [inputData, setInputData] = useState<Partial<UserData>>({});
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [modalType, setModalType] = useState<string>("");
+
 
   useEffect(() => {
     let userLocalData = localStorage.getItem("userData");
 
     if (userLocalData !== null) {
-      let parsedUserData = JSON.parse(userLocalData);
+      let parsedUserData = JSON.parse(userLocalData) as UserData;
       setUserData(parsedUserData);
     }
   }, []);
 
-  const handleModalClose = (e: any) => {
-    if (e.target === e.currentTarget) {
+
+ const handleModalClose = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+   if (e.target === e.currentTarget) {
+     setIsModalOpen(false);
+   }
+ };
+
+
+const submitEditedData = () => {
+  switch (modalType) {
+    case "name": {
+      const newUserData: UserData = { ...userData, name: inputData.name || userData.name };
+
+      setUserData(newUserData);
+      localStorage.setItem("userData", JSON.stringify(newUserData));
+      setInputData({});
       setIsModalOpen(false);
+      break;
     }
-  };
+    case "initialWeight": {
+      const transformedWeightInput = inputData.initialWeight?.replace(",", ".") || "";
 
-  const submitEditedData = () => {
-    switch (modalType) {
-      case "name": {
-        const newUserData: any = { ...userData, name: inputData.name };
-
-        setUserData(newUserData);
-        localStorage.setItem("userData", JSON.stringify(newUserData));
-        setInputData({});
-        setIsModalOpen(false);
-        break;
-      }
-      case "initialWeight": {
-        const transformedWeightInput = inputData.initialWeight.replace(",", ".");
-
-        const newUserData: any = { ...userData, initialWeight: transformedWeightInput };
-        setUserData(newUserData);
-        localStorage.setItem("userData", JSON.stringify(newUserData));
-        setInputData({});
-        setIsModalOpen(false);
-        break;
-      }
-      case "goalWeight": {
-        const transformedWeightInput = inputData.goalWeight.replace(",", ".");
-
-        const newUserData: any = { ...userData, goalWeight: transformedWeightInput };
-        setUserData(newUserData);
-        localStorage.setItem("userData", JSON.stringify(newUserData));
-        setInputData({});
-        setIsModalOpen(false);
-        break;
-      }
-
-      default:
-        return;
+      const newUserData: UserData = { ...userData, initialWeight: transformedWeightInput };
+      setUserData(newUserData);
+      localStorage.setItem("userData", JSON.stringify(newUserData));
+      setInputData({});
+      setIsModalOpen(false);
+      break;
     }
-  };
+    case "goalWeight": {
+      const transformedWeightInput = inputData.goalWeight?.replace(",", ".") || "";
+
+      const newUserData: UserData = { ...userData, goalWeight: transformedWeightInput };
+      setUserData(newUserData);
+      localStorage.setItem("userData", JSON.stringify(newUserData));
+      setInputData({});
+      setIsModalOpen(false);
+      break;
+    }
+
+    default:
+      return;
+  }
+};
 
   return (
     <div className="relative bg-gray-50 flex flex-col h-screen py-4 px-6">

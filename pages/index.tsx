@@ -15,140 +15,93 @@ export interface WeightData {
   weight: string;
 }
 export default function Main() {
-  const [selectedTab, setSelectedTab] = useState("home");
+  const [selectedTab, setSelectedTab] = useState<string>("home");
   const [weightInput, setWeightInput] = useState<string | null>(null);
   const [dateInput, setDateInput] = useState<string | null>(null);
   const [weightData, setWeightData] = useState<WeightData[]>([]);
   const [userData, setUserData] = useState<any>({});
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let localData = localStorage.getItem("weightData");
-    let userLocalData = localStorage.getItem("userData");
+   useEffect(() => {
+     let localData = localStorage.getItem("weightData");
+     let userLocalData = localStorage.getItem("userData");
 
-    
-    if (localData !== null) {
-      let parsedWeightData = JSON.parse(localData);
-      let sortedWeightData = parsedWeightData.sort((a: any, b: any) => {
-        const dateA: any = new Date(a.date.split("/").reverse().join("/"));
-        const dateB: any = new Date(b.date.split("/").reverse().join("/"));
-        return dateB - dateA;
-      });
-      setWeightData(sortedWeightData);
-    }
-    if (userLocalData !== null) {
-      let parsedUserData = JSON.parse(userLocalData);
-      setUserData(parsedUserData);
-    }
-  }, []);
+     if (localData !== null) {
+       let parsedWeightData = JSON.parse(localData) as WeightData[];
+       let sortedWeightData = parsedWeightData.sort((a: WeightData, b: WeightData) => {
+         const dateA = new Date(a.date.split("/").reverse().join("/"));
+         const dateB = new Date(b.date.split("/").reverse().join("/"));
+         return dateB.getTime() - dateA.getTime();
+       });
+       setWeightData(sortedWeightData);
+     }
+     if (userLocalData !== null) {
+       let parsedUserData = JSON.parse(userLocalData);
+       setUserData(parsedUserData);
+     }
+   }, []);
 
-  const handleSubmit = (event: any) => {
-    event.preventDefault();
 
-    if (!weightInput) {
-      setError("Please enter your weight.");
-      return;
-    }
+ const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+   event.preventDefault();
 
-    const setDate = dateInput ? new Date(dateInput) : new Date();
-    const dateString = setDate.toLocaleDateString();
+   if (!weightInput) {
+     setError("Please enter your weight.");
+     return;
+   }
 
-    const existingWeightData = weightData.find((data: any) => data.date === dateString);
+   const setDate = dateInput ? new Date(dateInput) : new Date();
+   const dateString = setDate.toLocaleDateString();
 
-    const transformedWeightInput = weightInput && weightInput.replace(",", ".");
+   const existingWeightData = weightData.find((data: WeightData) => data.date === dateString);
 
-    if (existingWeightData) {
-      const confirmed = window.confirm(`You already have a weight record for ${dateString}. Do you want to update it?`);
+   const transformedWeightInput = weightInput && weightInput.replace(",", ".");
 
-      if (confirmed) {
-        const updatedWeightData = weightData.map((data: any) => {
-          if (data.date === dateString) {
-            return { ...data, weight: transformedWeightInput };
-          }
-          return data;
-        });
+   if (existingWeightData) {
+     const confirmed = window.confirm(`You already have a weight record for ${dateString}. Do you want to update it?`);
 
-        setWeightData(updatedWeightData);
-        localStorage.setItem("weightData", JSON.stringify(updatedWeightData));
-        setSelectedTab("graph");
-        setWeightInput(null);
-        setDateInput(null);
-        setError(null);
-      }
-    } else {
-      const newWeightData: any = [{ date: dateString, weight: transformedWeightInput }, ...weightData];
-      setWeightData(newWeightData);
-      localStorage.setItem("weightData", JSON.stringify(newWeightData));
-      setSelectedTab("graph");
-      setWeightInput(null);
-      setDateInput(null);
-      setError(null);
-    }
-  };
+     if (confirmed) {
+       const updatedWeightData = weightData.map((data: WeightData) => {
+         if (data.date === dateString) {
+           return { ...data, weight: transformedWeightInput };
+         }
+         return data;
+       });
+
+       setWeightData(updatedWeightData);
+       localStorage.setItem("weightData", JSON.stringify(updatedWeightData));
+       setSelectedTab("graph");
+       setWeightInput(null);
+       setDateInput(null);
+       setError(null);
+     }
+   } else {
+     const newWeightData: WeightData[] = [{ date: dateString, weight: transformedWeightInput }, ...weightData];
+     setWeightData(newWeightData);
+     localStorage.setItem("weightData", JSON.stringify(newWeightData));
+     setSelectedTab("graph");
+     setWeightInput(null);
+     setDateInput(null);
+     setError(null);
+   }
+ };
+
 
   const changeTab = (tab: string) => {
     setSelectedTab(tab);
     setError(null);
   };
 
-  function deleteWeightRecord(records: any, selectedRecord: any) {
-    let newArrayOfWeights = records.filter((record: any) => record !== selectedRecord);
+  function deleteWeightRecord(records: WeightData[], selectedRecord: WeightData) {
+    let newArrayOfWeights = records.filter((record: WeightData) => record !== selectedRecord);
     setWeightData(newArrayOfWeights);
     localStorage.setItem("weightData", JSON.stringify(newArrayOfWeights));
   }
-  function calculateWeeklyAverages(data: any) {
-    // Convert date strings to Date objects
-    const formattedData = data.map((entry: any) => ({
-      ...entry,
-      date: new Date(entry.date.split("/").reverse().join("-")),
-    }));
 
-    // Sort the data array by dates in ascending order
-    formattedData.sort((a: any, b: any) => a.date - b.date);
 
-    let weeklyAverages = [];
 
-    // Group weight entries by week
-    let currentWeek = [];
-    for (let i = 0; i < formattedData.length; i++) {
-      const entry = formattedData[i];
-      currentWeek.push(entry);
 
-      // Check if the next entry is in a different week or if it's the last entry
-      if (i === formattedData.length - 1 || getWeekNumber(entry.date) !== getWeekNumber(formattedData[i + 1].date)) {
-        // Calculate the average weight for the current week
-        const average = calculateAverageWeight(currentWeek);
 
-        weeklyAverages.push(average);
-
-        // Reset the current week array
-        currentWeek = [];
-      }
-    }
-
-    return weeklyAverages;
-  }
-
-  function getWeekNumber(date: any) {
-    const oneJan: any = new Date(date.getFullYear(), 0, 1);
-    return Math.ceil(((date - oneJan) / 86400000 + oneJan.getDay() + 1) / 7);
-  }
-
-  function calculateAverageWeight(weekData: any) {
-    const weights = weekData.map((entry: any) => parseFloat(entry.weight));
-    const existingWeights = weights.filter((weight: any) => !isNaN(weight));
-
-    if (existingWeights.length === 0) {
-      return null;
-    }
-
-    const sum = existingWeights.reduce((acc: any, weight: any) => acc + weight, 0);
-    const average = sum / existingWeights.length;
-
-    return average.toFixed(2); // Adjust the decimal places as desired
-  }
-
-  const weeklyAverages = calculateWeeklyAverages(weightData);
 
   if (!userData.name) {
     return <RequestName error={error} setError={setError} setUserData={setUserData} userData={userData} />;

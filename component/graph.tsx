@@ -1,6 +1,6 @@
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { classNames } from "../utils";
-import { useEffect, useRef, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import { WeightData } from "../pages";
 
 export interface IAppProps {
@@ -9,24 +9,24 @@ export interface IAppProps {
 }
 
 export default function Graph({ weightData, deleteWeightRecord }: IAppProps) {
-  const [selectedFilter, setSelectedFilter] = useState("7days");
-  const [touchStart, setTouchStart] = useState(null);
-  const [touchEnd, setTouchEnd] = useState(null);
-  let [showButtons, setShowButtons] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState(null);
-  const buttonRef: any = useRef(null);
+  const [selectedFilter, setSelectedFilter] = useState<string>("7days");
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  let [showButtons, setShowButtons] = useState<boolean>(false);
+  const [selectedRecord, setSelectedRecord] = useState<WeightData | null>(null);
+  const buttonRef: RefObject<HTMLButtonElement> = useRef(null);
 
   // the required distance between touchStart and touchEnd to be detected as a swipe
   const minSwipeDistance = 50;
 
-  const onTouchStart = (e: any) => {
+  const onTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null); // otherwise the swipe is fired even with usual touch events
     setTouchStart(e.targetTouches[0].clientX);
   };
 
-  const onTouchMove = (e: any) => setTouchEnd(e.targetTouches[0].clientX);
+  const onTouchMove = (e: React.TouchEvent) => setTouchEnd(e.targetTouches[0].clientX);
 
-  const onTouchEnd = (weight: any) => {
+  const onTouchEnd = (weight: WeightData) => {
     if (!touchStart || !touchEnd) return;
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
@@ -63,13 +63,13 @@ export default function Graph({ weightData, deleteWeightRecord }: IAppProps) {
     const startDate = rangeFunction();
     const endDate = new Date();
 
-    const resultProductData = weightData.filter((a: any) => {
+    const resultProductData = weightData.filter((a: WeightData) => {
       const dateParts = a.date.split("/");
       const date = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
       return date >= startDate && date <= endDate;
     });
 
-    const sortedWeightData = resultProductData.sort((a: any, b: any) => {
+    const sortedWeightData = resultProductData.sort((a: WeightData, b: WeightData) => {
       const datePartsA = a.date.split("/");
       const dateA: any = new Date(`${datePartsA[2]}-${datePartsA[1]}-${datePartsA[0]}`);
 
@@ -81,8 +81,7 @@ export default function Graph({ weightData, deleteWeightRecord }: IAppProps) {
 
     return sortedWeightData;
   };
-
-  const filteredAndSortedData = filteredDates().sort((a: any, b: any) => {
+  const filteredAndSortedData = filteredDates().sort((a: WeightData, b: WeightData) => {
     const datePartsA = a.date.split("/");
     const dateA: any = new Date(`${datePartsA[2]}-${datePartsA[1]}-${datePartsA[0]}`);
 
