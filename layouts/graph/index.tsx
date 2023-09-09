@@ -1,14 +1,14 @@
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { classNames } from "../utils";
+import { classNames } from "../../utils";
 import { RefObject, useEffect, useRef, useState } from "react";
-import { WeightData } from "../pages";
+import { WeightData } from "../general/generalInterfaces";
+import { useGeneralContext } from "../../context/generalContext";
+import { deleteWeightRecord, filteredDates, handleClickOutsideButton } from "./graphUtils";
+import RecordEntry from "./recordEntry";
 
-export interface IAppProps {
-  weightData: WeightData[];
-  deleteWeightRecord: (records: WeightData[], weight: WeightData) => void;
-}
+export default function GraphLayout() {
+  const { setError, error, weightData, setWeightData } = useGeneralContext();
 
-export default function Graph({ weightData, deleteWeightRecord }: IAppProps) {
   const [selectedFilter, setSelectedFilter] = useState<string>("7days");
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -16,72 +16,7 @@ export default function Graph({ weightData, deleteWeightRecord }: IAppProps) {
   const [selectedRecord, setSelectedRecord] = useState<WeightData | null>(null);
   const buttonRef: RefObject<HTMLButtonElement> = useRef(null);
 
-  // the required distance between touchStart and touchEnd to be detected as a swipe
-  const minSwipeDistance = 50;
-
-  const onTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null); // otherwise the swipe is fired even with usual touch events
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-
-  const onTouchMove = (e: React.TouchEvent) => setTouchEnd(e.targetTouches[0].clientX);
-
-  const onTouchEnd = (weight: WeightData) => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-    if (isLeftSwipe) {
-      setShowButtons(true);
-      setSelectedRecord(weight);
-    }
-  };
-
-  let rangeFunction = () => {
-    switch (selectedFilter) {
-      case "7days": {
-        return new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-      }
-      case "30days": {
-        return new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-      }
-
-      case "6months": {
-        return new Date(Date.now() - 6 * 30 * 24 * 60 * 60 * 1000);
-      }
-
-      case "1year": {
-        return new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
-      }
-      default:
-        // If an invalid range is specified, return the original data
-        return weightData;
-    }
-  };
-
-  const filteredDates = () => {
-    const startDate = rangeFunction();
-    const endDate = new Date();
-
-    const resultProductData = weightData.filter((a: WeightData) => {
-      const dateParts = a.date.split("/");
-      const date = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
-      return date >= startDate && date <= endDate;
-    });
-
-    const sortedWeightData = resultProductData.sort((a: WeightData, b: WeightData) => {
-      const datePartsA = a.date.split("/");
-      const dateA: any = new Date(`${datePartsA[2]}-${datePartsA[1]}-${datePartsA[0]}`);
-
-      const datePartsB = b.date.split("/");
-      const dateB: any = new Date(`${datePartsB[2]}-${datePartsB[1]}-${datePartsB[0]}`);
-
-      return dateA - dateB;
-    });
-
-    return sortedWeightData;
-  };
-  const filteredAndSortedData = filteredDates().sort((a: WeightData, b: WeightData) => {
+  const filteredAndSortedData = filteredDates(selectedFilter, weightData).sort((a: WeightData, b: WeightData) => {
     const datePartsA = a.date.split("/");
     const dateA: any = new Date(`${datePartsA[2]}-${datePartsA[1]}-${datePartsA[0]}`);
 
@@ -89,18 +24,6 @@ export default function Graph({ weightData, deleteWeightRecord }: IAppProps) {
     const dateB: any = new Date(`${datePartsB[2]}-${datePartsB[1]}-${datePartsB[0]}`);
     return dateB - dateA;
   });
-  const handleClickOutsideButton = (e: any) => {
-    if (buttonRef.current && buttonRef.current !== e.target && !buttonRef.current.contains(e.target)) {
-      setShowButtons(false);
-      setSelectedRecord(null);
-    }
-  };
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      document.addEventListener("click", handleClickOutsideButton);
-    }
-  }, []);
 
   return (
     <div className="bg-gray-50  h-[91%] overflow-y-auto px-2 pt-2">
@@ -108,7 +31,7 @@ export default function Graph({ weightData, deleteWeightRecord }: IAppProps) {
         <div className="w-full h-[92%]">
           <ResponsiveContainer>
             <LineChart
-              data={filteredDates()}
+              data={filteredDates(selectedFilter, weightData)}
               margin={{
                 right: 30,
                 left: -10,
@@ -192,27 +115,7 @@ export default function Graph({ weightData, deleteWeightRecord }: IAppProps) {
         <h1 className=" text-gray-500 font-semibold">History</h1>
         <div className=" divide-y divide-gray-200">
           {filteredAndSortedData.map((weight: any) => (
-            <div
-              className="flex  justify-between items-center py-4 relative "
-              onTouchStart={(e) => onTouchStart(e)}
-              onTouchMove={onTouchMove}
-              onTouchEnd={() => onTouchEnd(weight)}
-            >
-              <h1 className="text-gray-500">{weight.date}</h1>
-              <div className="flex items-end">
-                <h1 className="text-gray-600  font-medium">{weight.weight}</h1>
-                <h1 className="text-gray-500 text-sm ">kg</h1>
-              </div>
-              {showButtons && selectedRecord === weight && (
-                <button
-                  onClick={() => deleteWeightRecord(weightData, weight)}
-                  ref={buttonRef}
-                  className="absolute right-0 z-50 bg-red-500 p-2 rounded-lg text-white "
-                >
-                  delete
-                </button>
-              )}
-            </div>
+            <RecordEntry weight={weight} key={weight.date} />
           ))}
         </div>
       </div>
