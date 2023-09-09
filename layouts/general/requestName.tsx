@@ -1,13 +1,8 @@
 import { useState } from "react";
+import { useGeneralContext } from "../../context/generalContext";
 
-export interface IAppProps {
-  setUserData: (e: any) => void;
-  setError: (e: any) => void;
-  userData: any;
-  error: string | null;
-}
-
-export default function RequestName({ setUserData, userData, error, setError }: IAppProps) {
+export default function RequestName() {
+  const { setError, userData, setUserData, error } = useGeneralContext();
   const [userInput, setUserInput] = useState<any>(null);
 
   const submitName = (e: any) => {
