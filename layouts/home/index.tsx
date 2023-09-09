@@ -1,81 +1,50 @@
-import * as React from "react";
-import { WeightData } from "../pages";
 import Link from "next/link";
+import { useGeneralContext } from "../../context/generalContext";
+import { WeightData } from "../general/generalInterfaces";
+import { calculateAverageWeight, getWhatLeftToGoal } from "./homeUtils";
 
-export interface IAppProps {
-  weightData: WeightData[];
-  userData: any;
-}
+let renderCorrectArrow = (weight: any) => {
+  let weightCheck = weight;
+  if (typeof weight === "string") weightCheck = Number(weight);
 
-export default function Home({ weightData, userData }: IAppProps) {
-  // Function to convert date string to JavaScript Date object
-  function parseDate(dateString: string): Date {
-    const parts = dateString.split("/");
-    return new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
+  if (weightCheck < 1) {
+    return (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth={1.5}
+        stroke="currentColor"
+        className="w-6 h-6 self-center text-green-500 mr-2"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" />
+      </svg>
+    );
   }
-
-  // Calculate the average weight for a given time period
-  function calculateAverageWeight(data: WeightData[], startDate: Date, endDate: Date): number {
-    const filteredData = data.filter((item) => {
-      const itemDate = parseDate(item.date);
-      return itemDate >= startDate && itemDate <= endDate;
-    });
-
-    if (filteredData.length === 0) {
-      return 0; // No data available for the given period
-    }
-
-    const sum = filteredData.reduce((total, item) => total + parseFloat(item.weight), 0);
-    const average = sum / filteredData.length;
-    return parseFloat(average.toFixed(1));
+  if (weightCheck > 1) {
+    return (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth={1.5}
+        stroke="currentColor"
+        className="w-6 h-6 self-center text-red-500 mr-2"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
+      </svg>
+    );
   }
+};
+
+export default function Home() {
+  const { userData, weightData } = useGeneralContext();
 
   // Convert the weight values in the array from strings to numbers
   const convertedWeightData: any = weightData.map((item: any) => ({
     date: item.date,
     weight: parseFloat(item.weight),
   }));
-
-  let renderCorrectArrow = (weight: any) => {
-    let weightCheck = weight;
-    if (typeof weight === "string") weightCheck = Number(weight);
-
-    if (weightCheck < 1) {
-      return (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="w-6 h-6 self-center text-green-500 mr-2"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" />
-        </svg>
-      );
-    }
-    if (weightCheck > 1) {
-      return (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="w-6 h-6 self-center text-red-500 mr-2"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
-        </svg>
-      );
-    }
-  };
-
-  let getWhatLeftToGoal = (): number => {
-    let goalWeightToNumber = Number(userData.goalWeight);
-    let currentWeightToNumber = weightData[0] ? Number(weightData[0].weight) : Number(userData.initialWeight);
-
-    return +(goalWeightToNumber - currentWeightToNumber).toFixed(1);
-  };
 
   // Calculate the average weight for the last week
   const currentDate = new Date();
@@ -105,7 +74,6 @@ export default function Home({ weightData, userData }: IAppProps) {
   }
   return (
     <div className="bg-gray-50 h-[91%] overflow-y-auto flex flex-col items-center py-4 px-8">
-      
       <Link href={"/settings"} className="self-end">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -126,7 +94,9 @@ export default function Home({ weightData, userData }: IAppProps) {
             {weightData[0] ? weightData[0].weight : userData.initialWeight}
           </h1>
           <p>{weightData[0] && weightData[0].date}</p>
-          <h1 className="text-lg text-gray-500">{`${Math.abs(getWhatLeftToGoal())}kg left to my goal`}</h1>
+          <h1 className="text-lg text-gray-500">{`${Math.abs(
+            getWhatLeftToGoal(userData, weightData)
+          )}kg left to my goal`}</h1>
         </div>
         <div className="w-full flex items-center space-x-2">
           <h1 className="text-gray-500 text-sm">{`${userData.initialWeight}`}</h1>
